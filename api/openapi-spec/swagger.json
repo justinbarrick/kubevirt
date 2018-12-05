@@ -3989,6 +3989,7 @@
      }
     }
    },
+   "v1.Bootloader": {},
    "v1.CDRomTarget": {
     "properties": {
      "bus": {
@@ -4281,6 +4282,9 @@
      "devices"
     ],
     "properties": {
+     "bootloader": {
+      "$ref": "#/definitions/v1.Bootloader"
+     },
      "clock": {
       "description": "Clock sets the clock and timers of the vmi.\n+optional",
       "$ref": "#/definitions/v1.Clock"

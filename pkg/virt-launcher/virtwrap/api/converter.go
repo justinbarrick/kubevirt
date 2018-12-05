@@ -49,6 +49,7 @@ const (
 	CPUModeHostPassthrough = "host-passthrough"
 	CPUModeHostModel       = "host-model"
 	defaultIOThread        = uint(1)
+	EFIBootloaderPath      = "/usr/share/OVMF/OVMF_CODE.fd"
 )
 
 type ConverterContext struct {
@@ -595,6 +596,12 @@ func Convert_v1_VirtualMachine_To_api_Domain(vmi *v1.VirtualMachineInstance, dom
 				Name:  "uuid",
 				Value: string(vmi.Spec.Domain.Firmware.UUID),
 			},
+		}
+	}
+
+	if vmi.Spec.Domain.Bootloader != nil {
+		if (*vmi.Spec.Domain.Bootloader) == v1.BootloaderEFI {
+			domain.Spec.OS.Loader.Path = EFIBootloaderPath
 		}
 	}
 
