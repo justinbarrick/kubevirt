@@ -29,6 +29,7 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
+		"kubevirt.io/kubevirt/pkg/api/v1.Bootloader":                                schema_kubevirt_pkg_api_v1_Bootloader(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.CDRomTarget":                               schema_kubevirt_pkg_api_v1_CDRomTarget(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.CPU":                                       schema_kubevirt_pkg_api_v1_CPU(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.Clock":                                     schema_kubevirt_pkg_api_v1_Clock(ref),
@@ -108,6 +109,48 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kubevirt.io/kubevirt/pkg/api/v1.VolumeSource":                              schema_kubevirt_pkg_api_v1_VolumeSource(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.Watchdog":                                  schema_kubevirt_pkg_api_v1_Watchdog(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.WatchdogDevice":                            schema_kubevirt_pkg_api_v1_WatchdogDevice(ref),
+	}
+}
+
+func schema_kubevirt_pkg_api_v1_Bootloader(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Represents the firmware blob used to assist in the domain creation process. Used by Xen fully virtualized domains as well as setting the QEMU BIOS file path for QEMU/KVM domains",
+				Properties: map[string]spec.Schema{
+					"path": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The path to the firmware blob",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"secure": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Some firmwares implements the Secure boot feature",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"readonly": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Should the image be writable or read-only",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Accepts values `rom` or `pflash`; tells the hypervisor where in the guest memory the file should be mapped If the loader points to an UEFI image, `type` should be `pflash`",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"path"},
+			},
+		},
+		Dependencies: []string{},
 	}
 }
 
@@ -681,8 +724,7 @@ func schema_kubevirt_pkg_api_v1_DomainSpec(ref common.ReferenceCallback) common.
 					},
 					"bootloader": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Ref: ref("kubevirt.io/kubevirt/pkg/api/v1.Bootloader"),
 						},
 					},
 				},
@@ -690,7 +732,7 @@ func schema_kubevirt_pkg_api_v1_DomainSpec(ref common.ReferenceCallback) common.
 			},
 		},
 		Dependencies: []string{
-			"kubevirt.io/kubevirt/pkg/api/v1.CPU", "kubevirt.io/kubevirt/pkg/api/v1.Clock", "kubevirt.io/kubevirt/pkg/api/v1.Devices", "kubevirt.io/kubevirt/pkg/api/v1.Features", "kubevirt.io/kubevirt/pkg/api/v1.Firmware", "kubevirt.io/kubevirt/pkg/api/v1.Machine", "kubevirt.io/kubevirt/pkg/api/v1.Memory", "kubevirt.io/kubevirt/pkg/api/v1.ResourceRequirements"},
+			"kubevirt.io/kubevirt/pkg/api/v1.Bootloader", "kubevirt.io/kubevirt/pkg/api/v1.CPU", "kubevirt.io/kubevirt/pkg/api/v1.Clock", "kubevirt.io/kubevirt/pkg/api/v1.Devices", "kubevirt.io/kubevirt/pkg/api/v1.Features", "kubevirt.io/kubevirt/pkg/api/v1.Firmware", "kubevirt.io/kubevirt/pkg/api/v1.Machine", "kubevirt.io/kubevirt/pkg/api/v1.Memory", "kubevirt.io/kubevirt/pkg/api/v1.ResourceRequirements"},
 	}
 }
 
