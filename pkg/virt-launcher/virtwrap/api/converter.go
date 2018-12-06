@@ -49,7 +49,6 @@ const (
 	CPUModeHostPassthrough = "host-passthrough"
 	CPUModeHostModel       = "host-model"
 	defaultIOThread        = uint(1)
-	EFIBootloaderPath      = "/usr/share/OVMF/OVMF_CODE.fd"
 )
 
 type ConverterContext struct {
@@ -600,9 +599,25 @@ func Convert_v1_VirtualMachine_To_api_Domain(vmi *v1.VirtualMachineInstance, dom
 	}
 
 	if vmi.Spec.Domain.Bootloader != nil {
-		if (*vmi.Spec.Domain.Bootloader) == v1.BootloaderEFI {
-			domain.Spec.OS.Loader.Path = EFIBootloaderPath
+		var ro, sec bool
+		if vmi.Spec.Domain.Bootloader.ReadOnly != nil {
+			ro = *vmi.Spec.Domain.Bootloader.ReadOnly
 		}
+		if vmi.Spec.Domain.Bootloader.Secure != nil {
+			sec = *vmi.Spec.Domain.Bootloader.Secure
+		}
+
+		loader := &Loader{
+			Path:     vmi.Spec.Domain.Bootloader.Path,
+			ReadOnly: ro,
+			Secure:   sec,
+		}
+
+		if vmi.Spec.Domain.Bootloader.Type != "" {
+			loader.Type = vmi.Spec.Domain.Bootloader.Type
+		}
+
+		domain.Spec.OS.BootLoader = loader
 	}
 
 	// Take memory from the requested memory

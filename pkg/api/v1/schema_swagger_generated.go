@@ -2,6 +2,16 @@
 
 package v1
 
+func (Bootloader) SwaggerDoc() map[string]string {
+	return map[string]string{
+		"":         "Represents the firmware blob used to assist in the domain creation process.\nUsed by Xen fully virtualized domains as well as setting the QEMU BIOS file path for QEMU/KVM domains",
+		"path":     "The path to the firmware blob",
+		"secure":   "Some firmwares implements the Secure boot feature",
+		"readonly": "Should the image be writable or read-only",
+		"type":     "Accepts values `rom` or `pflash`; tells the hypervisor where in the guest memory the file should be mapped\nIf the loader points to an UEFI image, `type` should be `pflash`",
+	}
+}
+
 func (HostDisk) SwaggerDoc() map[string]string {
 	return map[string]string{
 		"":         "Represents a disk created on the cluster level",
