@@ -599,25 +599,25 @@ func Convert_v1_VirtualMachine_To_api_Domain(vmi *v1.VirtualMachineInstance, dom
 	}
 
 	if vmi.Spec.Domain.Bootloader != nil {
-		var ro, sec bool
-		if vmi.Spec.Domain.Bootloader.ReadOnly != nil {
-			ro = *vmi.Spec.Domain.Bootloader.ReadOnly
-		}
-		if vmi.Spec.Domain.Bootloader.Secure != nil {
-			sec = *vmi.Spec.Domain.Bootloader.Secure
+		loader := &Loader{
+			Path: vmi.Spec.Domain.Bootloader.Path,
 		}
 
-		loader := &Loader{
-			Path:     vmi.Spec.Domain.Bootloader.Path,
-			ReadOnly: ro,
-			Secure:   sec,
-		}
+		loader.ReadOnly = boolToYesNo(vmi.Spec.Domain.Bootloader.ReadOnly, true)
+		loader.Secure = boolToYesNo(vmi.Spec.Domain.Bootloader.Secure, false)
 
 		if vmi.Spec.Domain.Bootloader.Type != "" {
 			loader.Type = vmi.Spec.Domain.Bootloader.Type
 		}
 
 		domain.Spec.OS.BootLoader = loader
+
+		if loader.Type == "pflash" {
+			domain.Spec.OS.NVRam = &NVRam{
+				NVRam:    "/usr/share/OVMF/OVMF_VARS.fd",
+				Template: filepath.Join("/tmp", domain.Spec.Name+".nvram"),
+			}
+		}
 	}
 
 	// Take memory from the requested memory
