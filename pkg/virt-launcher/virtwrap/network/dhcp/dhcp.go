@@ -149,6 +149,12 @@ func prepareDHCPOptions(
 			log.Log.Infof("Setting dhcp option boot file name to %s", customDHCPOptions.BootFileName)
 			dhcpOptions[dhcp.OptionBootFileName] = []byte(customDHCPOptions.BootFileName)
 		}
+
+		if customDHCPOptions.ExtraOptions != nil {
+			for code, value := range customDHCPOptions.ExtraOptions {
+				dhcpOptions[dhcp.OptionCode(byte(code))] = []byte(value)
+			}
+		}
 	}
 
 	return dhcpOptions, nil
@@ -174,12 +180,12 @@ func (h *DHCPHandler) ServeDHCP(p dhcp.Packet, msgType dhcp.MessageType, options
 	case dhcp.Discover:
 		log.Log.V(4).Info("The request has message type DISCOVER")
 		return dhcp.ReplyPacket(p, dhcp.Offer, h.serverIP, h.clientIP, h.leaseDuration,
-			h.options.SelectOrderOrAll(options[dhcp.OptionParameterRequestList]))
+			h.options.SelectOrderOrAll(nil))
 
 	case dhcp.Request:
 		log.Log.V(4).Info("The request has message type REQUEST")
 		return dhcp.ReplyPacket(p, dhcp.ACK, h.serverIP, h.clientIP, h.leaseDuration,
-			h.options.SelectOrderOrAll(options[dhcp.OptionParameterRequestList]))
+			h.options.SelectOrderOrAll(nil))
 
 	default:
 		log.Log.V(4).Info("The request has unhandled message type")

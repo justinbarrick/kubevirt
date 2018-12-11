@@ -825,6 +825,9 @@ type DHCPOptions struct {
 	// If specified will pass option 66 to interface's DHCP server
 	// +optional
 	TFTPServerName string `json:"tftpServerName,omitempty"`
+
+	// Extra DHCP options
+	ExtraOptions map[int]string `json:"extraOptions,omitempty"`
 }
 
 // Represents the method which will be used to connect the interface to the guest.

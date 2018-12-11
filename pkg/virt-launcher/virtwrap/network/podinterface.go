@@ -216,8 +216,12 @@ func (b *BridgePodInterface) preparePodNetworkInterfaces() error {
 		return err
 	}
 
-	if _, err := Handler.SetRandomMac(b.podInterfaceName); err != nil {
-		return err
+	if len(b.vif.MAC) == 0 {
+		mac, err := Handler.SetRandomMac(b.podInterfaceName)
+		if err != nil {
+			return err
+		}
+		b.vif.MAC = mac
 	}
 
 	if err := Handler.LinkSetUp(b.podNicLink); err != nil {
