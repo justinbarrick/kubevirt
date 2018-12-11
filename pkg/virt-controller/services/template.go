@@ -555,6 +555,22 @@ func (t *templateService) RenderLaunchManifest(vmi *v1.VirtualMachineInstance) (
 
 	volumes = append(volumes, k8sv1.Volume{Name: "infra-ready-mount", VolumeSource: k8sv1.VolumeSource{EmptyDir: &k8sv1.EmptyDirVolumeSource{}}})
 
+	for name, path := range map[string]string{"dbus": "/var/run/dbus/system_bus_socket"} {
+		volumes = append(volumes, k8sv1.Volume{
+			Name: name,
+			VolumeSource: k8sv1.VolumeSource{
+				HostPath: &k8sv1.HostPathVolumeSource{
+					Path: path,
+				},
+			},
+		})
+
+		volumeMounts = append(volumeMounts, k8sv1.VolumeMount{
+			Name:      name,
+			MountPath: path,
+		})
+	}
+
 	// VirtualMachineInstance target container
 	container := k8sv1.Container{
 		Name:            "compute",
