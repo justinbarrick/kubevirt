@@ -2,16 +2,6 @@
 
 package v1
 
-func (Bootloader) SwaggerDoc() map[string]string {
-	return map[string]string{
-		"":         "Represents the firmware blob used to assist in the domain creation process.\nUsed by Xen fully virtualized domains as well as setting the QEMU BIOS file path for QEMU/KVM domains",
-		"path":     "The path to the firmware blob",
-		"secure":   "Some firmwares implements the Secure boot feature",
-		"readonly": "Should the image be writable or read-only",
-		"type":     "Accepts values `rom` or `pflash`; tells the hypervisor where in the guest memory the file should be mapped\nIf the loader points to an UEFI image, `type` should be `pflash`",
-	}
-}
-
 func (HostDisk) SwaggerDoc() map[string]string {
 	return map[string]string{
 		"":         "Represents a disk created on the cluster level",
@@ -66,6 +56,27 @@ func (DomainSpec) SwaggerDoc() map[string]string {
 	}
 }
 
+func (Bootloader) SwaggerDoc() map[string]string {
+	return map[string]string{
+		"":     "Represents the firmware blob used to assist in the domain creation process.\nUsed for setting the QEMU BIOS file path for the libvirt domain.",
+		"bios": "If set (default), BIOS will be used.\n+optional",
+		"efi":  "If set, EFI will be used instead of BIOS.\n+optional",
+	}
+}
+
+func (BIOS) SwaggerDoc() map[string]string {
+	return map[string]string{
+		"": "If set (default), BIOS will be used.",
+	}
+}
+
+func (EFI) SwaggerDoc() map[string]string {
+	return map[string]string{
+		"":       "If set, EFI will be used instead of BIOS.",
+		"secure": "Some firmwares implements the Secure boot feature",
+	}
+}
+
 func (ResourceRequirements) SwaggerDoc() map[string]string {
 	return map[string]string{
 		"requests":                "Requests is a description of the initial vmi resources.\nValid resource keys are \"memory\" and \"cpu\".\n+optional",
@@ -106,7 +117,8 @@ func (Machine) SwaggerDoc() map[string]string {
 
 func (Firmware) SwaggerDoc() map[string]string {
 	return map[string]string{
-		"uuid": "UUID reported by the vmi bios.\nDefaults to a random generated uid.",
+		"uuid":       "UUID reported by the vmi bios.\nDefaults to a random generated uid.",
+		"bootloader": "Settings to control the bootloader that is used.\n+optional",
 	}
 }
 

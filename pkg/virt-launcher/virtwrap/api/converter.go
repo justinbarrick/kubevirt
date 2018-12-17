@@ -49,6 +49,8 @@ const (
 	CPUModeHostPassthrough = "host-passthrough"
 	CPUModeHostModel       = "host-model"
 	defaultIOThread        = uint(1)
+	EFIPath                = "/usr/share/OVMF/OVMF_CODE.fd"
+	EFIVarsPath            = "/usr/share/OVMF/OVMF_VARS.fd"
 )
 
 type ConverterContext struct {
@@ -596,28 +598,20 @@ func Convert_v1_VirtualMachine_To_api_Domain(vmi *v1.VirtualMachineInstance, dom
 				Value: string(vmi.Spec.Domain.Firmware.UUID),
 			},
 		}
-	}
 
-	if vmi.Spec.Domain.Bootloader != nil {
-		var ro, sec bool
-		if vmi.Spec.Domain.Bootloader.ReadOnly != nil {
-			ro = *vmi.Spec.Domain.Bootloader.ReadOnly
-		}
-		if vmi.Spec.Domain.Bootloader.Secure != nil {
-			sec = *vmi.Spec.Domain.Bootloader.Secure
-		}
+		if vmi.Spec.Domain.Firmware.Bootloader != nil && vmi.Spec.Domain.Firmware.Bootloader.EFI != nil {
+			domain.Spec.OS.BootLoader = &Loader{
+				Path:     EFIPath,
+				ReadOnly: "yes",
+				Secure:   boolToYesNo(vmi.Spec.Domain.Firmware.Bootloader.EFI.Secure, false),
+				Type:     "pflash",
+			}
 
-		loader := &Loader{
-			Path:     vmi.Spec.Domain.Bootloader.Path,
-			ReadOnly: ro,
-			Secure:   sec,
+			domain.Spec.OS.NVRam = &NVRam{
+				NVRam:    EFIVarsPath,
+				Template: filepath.Join("/tmp", domain.Spec.Name),
+			}
 		}
-
-		if vmi.Spec.Domain.Bootloader.Type != "" {
-			loader.Type = vmi.Spec.Domain.Bootloader.Type
-		}
-
-		domain.Spec.OS.BootLoader = loader
 	}
 
 	// Take memory from the requested memory

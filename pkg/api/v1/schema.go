@@ -32,22 +32,6 @@ const (
 	IOThreadsPolicyAuto   IOThreadsPolicy = "auto"
 )
 
-// Represents the firmware blob used to assist in the domain creation process.
-// Used by Xen fully virtualized domains as well as setting the QEMU BIOS file path for QEMU/KVM domains
-// ---
-// +k8s:openapi-gen=true
-type Bootloader struct {
-	// The path to the firmware blob
-	Path string `json:"path"`
-	// Some firmwares implements the Secure boot feature
-	Secure *bool `json:"secure,optional,omitempty"`
-	// Should the image be writable or read-only
-	ReadOnly *bool `json:"readonly,optional,omitempty"`
-	// Accepts values `rom` or `pflash`; tells the hypervisor where in the guest memory the file should be mapped
-	// If the loader points to an UEFI image, `type` should be `pflash`
-	Type string `json:"type,optional,omitempty"`
-}
-
 //go:generate swagger-doc
 //go:generate openapi-gen -i . --output-package=kubevirt.io/kubevirt/pkg/api/v1  --go-header-file ../../../hack/boilerplate/boilerplate.go.txt
 
@@ -148,7 +132,33 @@ type DomainSpec struct {
 	// One of: shared, auto
 	// +optional
 	IOThreadsPolicy *IOThreadsPolicy `json:"ioThreadsPolicy,omitempty"`
-	Bootloader      *Bootloader      `json:"bootloader,omitempty"`
+}
+
+// Represents the firmware blob used to assist in the domain creation process.
+// Used for setting the QEMU BIOS file path for the libvirt domain.
+// ---
+// +k8s:openapi-gen=true
+type Bootloader struct {
+	// If set (default), BIOS will be used.
+	// +optional
+	BIOS *BIOS `json:"bios,optional,omitempty"`
+	// If set, EFI will be used instead of BIOS.
+	// +optional
+	EFI *EFI `json:"efi,optional,omitempty"`
+}
+
+// If set (default), BIOS will be used.
+// ---
+// +k8s:openapi-gen=true
+type BIOS struct {
+}
+
+// If set, EFI will be used instead of BIOS.
+// ---
+// +k8s:openapi-gen=true
+type EFI struct {
+	// Some firmwares implements the Secure boot feature
+	Secure *bool `json:"secure,optional,omitempty"`
 }
 
 // ---
@@ -224,6 +234,9 @@ type Firmware struct {
 	// UUID reported by the vmi bios.
 	// Defaults to a random generated uid.
 	UUID types.UID `json:"uuid,omitempty"`
+	// Settings to control the bootloader that is used.
+	// +optional
+	Bootloader *Bootloader `json:"bootloader,omitempty"`
 }
 
 // ---

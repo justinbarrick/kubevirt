@@ -29,6 +29,7 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
+		"kubevirt.io/kubevirt/pkg/api/v1.BIOS":                                      schema_kubevirt_pkg_api_v1_BIOS(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.Bootloader":                                schema_kubevirt_pkg_api_v1_Bootloader(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.CDRomTarget":                               schema_kubevirt_pkg_api_v1_CDRomTarget(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.CPU":                                       schema_kubevirt_pkg_api_v1_CPU(ref),
@@ -45,6 +46,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kubevirt.io/kubevirt/pkg/api/v1.DiskDevice":                                schema_kubevirt_pkg_api_v1_DiskDevice(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.DiskTarget":                                schema_kubevirt_pkg_api_v1_DiskTarget(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.DomainSpec":                                schema_kubevirt_pkg_api_v1_DomainSpec(ref),
+		"kubevirt.io/kubevirt/pkg/api/v1.EFI":                                       schema_kubevirt_pkg_api_v1_EFI(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.EmptyDiskSource":                           schema_kubevirt_pkg_api_v1_EmptyDiskSource(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.EphemeralVolumeSource":                     schema_kubevirt_pkg_api_v1_EphemeralVolumeSource(ref),
 		"kubevirt.io/kubevirt/pkg/api/v1.FeatureAPIC":                               schema_kubevirt_pkg_api_v1_FeatureAPIC(ref),
@@ -112,45 +114,41 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 	}
 }
 
+func schema_kubevirt_pkg_api_v1_BIOS(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "If set (default), BIOS will be used.",
+				Properties:  map[string]spec.Schema{},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
 func schema_kubevirt_pkg_api_v1_Bootloader(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "Represents the firmware blob used to assist in the domain creation process. Used by Xen fully virtualized domains as well as setting the QEMU BIOS file path for QEMU/KVM domains",
+				Description: "Represents the firmware blob used to assist in the domain creation process. Used for setting the QEMU BIOS file path for the libvirt domain.",
 				Properties: map[string]spec.Schema{
-					"path": {
+					"bios": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The path to the firmware blob",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "If set (default), BIOS will be used.",
+							Ref:         ref("kubevirt.io/kubevirt/pkg/api/v1.BIOS"),
 						},
 					},
-					"secure": {
+					"efi": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Some firmwares implements the Secure boot feature",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
-					"readonly": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Should the image be writable or read-only",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
-					"type": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Accepts values `rom` or `pflash`; tells the hypervisor where in the guest memory the file should be mapped If the loader points to an UEFI image, `type` should be `pflash`",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "If set, EFI will be used instead of BIOS.",
+							Ref:         ref("kubevirt.io/kubevirt/pkg/api/v1.EFI"),
 						},
 					},
 				},
-				Required: []string{"path"},
 			},
 		},
-		Dependencies: []string{},
+		Dependencies: []string{
+			"kubevirt.io/kubevirt/pkg/api/v1.BIOS", "kubevirt.io/kubevirt/pkg/api/v1.EFI"},
 	}
 }
 
@@ -722,17 +720,32 @@ func schema_kubevirt_pkg_api_v1_DomainSpec(ref common.ReferenceCallback) common.
 							Format:      "",
 						},
 					},
-					"bootloader": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("kubevirt.io/kubevirt/pkg/api/v1.Bootloader"),
-						},
-					},
 				},
 				Required: []string{"devices"},
 			},
 		},
 		Dependencies: []string{
-			"kubevirt.io/kubevirt/pkg/api/v1.Bootloader", "kubevirt.io/kubevirt/pkg/api/v1.CPU", "kubevirt.io/kubevirt/pkg/api/v1.Clock", "kubevirt.io/kubevirt/pkg/api/v1.Devices", "kubevirt.io/kubevirt/pkg/api/v1.Features", "kubevirt.io/kubevirt/pkg/api/v1.Firmware", "kubevirt.io/kubevirt/pkg/api/v1.Machine", "kubevirt.io/kubevirt/pkg/api/v1.Memory", "kubevirt.io/kubevirt/pkg/api/v1.ResourceRequirements"},
+			"kubevirt.io/kubevirt/pkg/api/v1.CPU", "kubevirt.io/kubevirt/pkg/api/v1.Clock", "kubevirt.io/kubevirt/pkg/api/v1.Devices", "kubevirt.io/kubevirt/pkg/api/v1.Features", "kubevirt.io/kubevirt/pkg/api/v1.Firmware", "kubevirt.io/kubevirt/pkg/api/v1.Machine", "kubevirt.io/kubevirt/pkg/api/v1.Memory", "kubevirt.io/kubevirt/pkg/api/v1.ResourceRequirements"},
+	}
+}
+
+func schema_kubevirt_pkg_api_v1_EFI(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "If set, EFI will be used instead of BIOS.",
+				Properties: map[string]spec.Schema{
+					"secure": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Some firmwares implements the Secure boot feature",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
 	}
 }
 
@@ -985,10 +998,17 @@ func schema_kubevirt_pkg_api_v1_Firmware(ref common.ReferenceCallback) common.Op
 							Format:      "",
 						},
 					},
+					"bootloader": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Settings to control the bootloader that is used.",
+							Ref:         ref("kubevirt.io/kubevirt/pkg/api/v1.Bootloader"),
+						},
+					},
 				},
 			},
 		},
-		Dependencies: []string{},
+		Dependencies: []string{
+			"kubevirt.io/kubevirt/pkg/api/v1.Bootloader"},
 	}
 }
 
